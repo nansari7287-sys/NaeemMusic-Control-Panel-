@@ -1,0 +1,2 @@
+# Android Control App
+Separate Android admin app is planned in this repository. It will use the same Worker API as the web dashboard. Initial Android screens are the next build phase; do not put admin tokens in source code or APK assets. Use a secure sign-in/session flow before production use.
