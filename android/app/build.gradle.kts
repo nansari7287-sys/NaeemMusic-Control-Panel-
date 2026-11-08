@@ -10,9 +10,9 @@ android {
   applicationId = "dev.drakoxnaeem.control"
   minSdk = 26
   targetSdk = 35
-  versionCode = 1
-  versionName = "0.1.0"
-  buildConfigField("String", "API_BASE_URL", "\"https://YOUR-WORKER.workers.dev\"")
+  versionCode = 2
+  versionName = "1.0.0"
+  buildConfigField("String", "API_BASE_URL", "\"https://naeem-music-control-api.ansarinaeem5558.workers.dev\"")
  }
  buildFeatures { compose = true; buildConfig = true }
 }
