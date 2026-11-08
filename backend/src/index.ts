@@ -1,6 +1,8 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 type Env={DB:D1Database;MEDIA:R2Bucket;ADMIN_TOKEN:string;PUBLIC_MEDIA_BASE_URL:string};
 const app=new Hono<{Bindings:Env}>();
+app.use("/api/*", cors({ origin: "*", allowMethods: ["GET", "POST", "PUT", "OPTIONS"], allowHeaders: ["Content-Type", "Authorization"] }));
 const defaults={branding:{appName:"Naeem Music",subtitle:"DrakoXNaeem",primaryColor:"#8B5CF6"},background:{type:"image",url:"",enabled:false,autoplay:true,muted:true,loop:true},announcement:{enabled:false,title:"",message:"",url:""},features:{lyrics:true,visualizer:true,aiSearch:false,experimentalUi:false},ads:{enabled:false,banner:false,interstitial:false,native:false,frequency:0}};
 const auth=(c:any)=>c.req.header("Authorization")==="Bearer "+c.env.ADMIN_TOKEN&&!!c.env.ADMIN_TOKEN;
 const no=(c:any)=>c.json({error:"Unauthorized"},401);
