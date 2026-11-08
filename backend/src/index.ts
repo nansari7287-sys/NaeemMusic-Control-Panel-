@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-type Env={DB:D1Database;MEDIA:R2Bucket;ADMIN_TOKEN:string;PUBLIC_MEDIA_BASE_URL:string};
+type Env={DB:D1Database;ADMIN_TOKEN:string};
 const app=new Hono<{Bindings:Env}>();
 app.use("/api/*", cors({ origin: "*", allowMethods: ["GET", "POST", "PUT", "OPTIONS"], allowHeaders: ["Content-Type", "Authorization"] }));
 const defaults={branding:{appName:"Naeem Music",subtitle:"DrakoXNaeem",primaryColor:"#8B5CF6"},background:{type:"image",url:"",enabled:false,autoplay:true,muted:true,loop:true},announcement:{enabled:false,title:"",message:"",url:""},features:{lyrics:true,visualizer:true,aiSearch:false,experimentalUi:false},ads:{enabled:false,banner:false,interstitial:false,native:false,frequency:0}};
@@ -13,5 +13,5 @@ app.get("/api/v1/config",async c=>c.json(await getConfig(c.env),200,{"Cache-Cont
 app.get("/api/admin/config",async c=>auth(c)?c.json(await getConfig(c.env)):no(c));
 app.put("/api/admin/config",async c=>{if(!auth(c))return no(c);let b:any;try{b=await c.req.json()}catch{return c.json({error:"Invalid JSON"},400)}if(!valid(b?.config))return c.json({error:"Config validation failed"},400);const old=await getConfig(c.env),v=old.version+1;await c.env.DB.batch([c.env.DB.prepare("INSERT INTO config_history(version,config_json) VALUES(?,?)").bind(old.version,JSON.stringify(old.config)),c.env.DB.prepare("UPDATE app_config SET version=?,config_json=?,updated_at=CURRENT_TIMESTAMP WHERE id=1").bind(v,JSON.stringify(b.config))]);return c.json({ok:true,version:v});});
 app.get("/api/admin/history",async c=>{if(!auth(c))return no(c);const r=await c.env.DB.prepare("SELECT version,created_at FROM config_history ORDER BY id DESC LIMIT 30").all();return c.json({items:r.results});});
-app.post("/api/admin/media",async c=>{if(!auth(c))return no(c);const f=(await c.req.formData()).get("file");if(!(f instanceof File))return c.json({error:"file required"},400);const types=["image/jpeg","image/png","image/webp","video/mp4","video/webm"];if(!types.includes(f.type))return c.json({error:"Unsupported media type"},415);const limit=f.type.startsWith("video/")?100*1024*1024:15*1024*1024;if(!f.size||f.size>limit)return c.json({error:"Media size limit exceeded"},413);const id=crypto.randomUUID(),ext=f.type.split("/")[1].replace("jpeg","jpg"),key="backgrounds/"+id+"."+ext;await c.env.MEDIA.put(key,f.stream(),{httpMetadata:{contentType:f.type}});return c.json({id,url:c.env.PUBLIC_MEDIA_BASE_URL.replace(/\\/$/,"")+"/"+key});});
+app.post("/api/admin/media",async c=>{if(!auth(c))return no(c);return c.json({error:"Media uploads are temporarily disabled. Configure R2 later."},503);});
 export default app;
